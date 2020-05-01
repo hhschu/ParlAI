@@ -1,0 +1,17 @@
+tasks:
+  default:
+    onboard_world: OnboardWorld
+    task_world: TaskWorld
+    timeout: 600
+    agents_required: 1
+task_name: chatbot
+world_module: parlai.chat_service.tasks.chatbot.blender
+overworld: Overworld
+max_workers: 30
+opt:
+  debug: True
+  models:
+    blender:
+      task: blended_skill_talk
+      model_file: zoo:blender/blender_3B/model
+      datapath: /home/ubuntu/ParlAI/data/
