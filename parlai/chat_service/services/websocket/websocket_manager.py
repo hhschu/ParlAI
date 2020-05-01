@@ -74,6 +74,8 @@ class WebsocketManager(ChatServiceManager):
             model_params = {}
             for model in self.opt['models']:
                 model_opt = self.opt['models'][model]
+                if 'datapath' not in model_opt:
+                    model_opt['datapath'] = self.opt['datapath']
                 model_params[model] = create_agent(model_opt).share()
             self.runner_opt['shared_bot_params'] = model_params
 

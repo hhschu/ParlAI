@@ -12,10 +12,6 @@ from parlai.core.agents import create_agent_from_shared
 
 
 class OnboardWorld(OnboardWorld):
-    """
-    Example messenger onboarding world for Chatbot Model.
-    """
-
     @staticmethod
     def generate_world(opt, agents):
         return OnboardWorld(opt=opt, agent=agents[0])
@@ -25,10 +21,6 @@ class OnboardWorld(OnboardWorld):
 
 
 class TaskWorld(World):
-    """
-    Example one person world that talks to a provided agent (bot).
-    """
-
     MAX_AGENTS = 1
 
     def __init__(self, opt, agent, bot):
@@ -56,14 +48,8 @@ class TaskWorld(World):
             if '[DONE]' in a['text']:
                 self.episodeDone = True
             else:
-                print("===act====")
-                print(a)
-                print("~~~~~~~~~~~")
                 self.model.observe(a)
                 response = self.model.act()
-                print("===response====")
-                print(response)
-                print("~~~~~~~~~~~")
                 self.agent.observe(response)
 
     def episode_done(self):
@@ -74,10 +60,6 @@ class TaskWorld(World):
 
 
 class Overworld(World):
-    """
-    World to handle moving agents to their proper places.
-    """
-
     def __init__(self, opt, agent):
         self.agent = agent
         self.opt = opt

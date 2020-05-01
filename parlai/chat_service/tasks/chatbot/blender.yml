@@ -14,4 +14,3 @@ opt:
     blender:
       task: blended_skill_talk
       model_file: zoo:blender/blender_3B/model
-      datapath: /home/ubuntu/ParlAI/data/
