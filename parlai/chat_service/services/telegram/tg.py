@@ -1,10 +1,17 @@
+import logging
 import os
+import queue
+import threading
 
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from .client import chats, connect_ws
+from .client import chats, connect_ws, contexts
 
-BOT_TOKEN = os.environ.get["BOT_TOKEN"]
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG
+)
+
+BOT_TOKEN = os.environ["BOT_TOKEN"]
 
 
 def start(update, context):
@@ -18,31 +25,31 @@ def talk(update, context):
     incoming_message = update.message.text
     chat_id = update.effective_chat.id
     if chat_id not in chats:
-        connect_ws(chat_id)
+        chats[chat_id] = queue.Queue()
+        user = update.effective_user
+        username = f"{user.first_name} {user.last_name}"
+        threading.Thread(connect_ws, args=(chat_id, username)).start()
     chats[chat_id].put(incoming_message)
     contexts[chat_id] = context
 
+
 def unknown(update, context):
     context.bot.send_message(
-        chat_id=update.effective_chat.id, text="Sorry, I don't have any command."
+        chat_id=update.effective_chat.id,
+        text="sorry, I don't have any command. just talk to me",
     )
 
 
-def client(bot_token):
-    updater = Updater(token=bot_token, use_context=True)
+if __name__ == "__main__":
+    updater = Updater(token=BOT_TOKEN, use_context=True)
+    dispatcher = updater.dispatcher
 
     start_handler = CommandHandler("start", start)
     message_handler = MessageHandler(Filters.text & (~Filters.command), talk)
     unknown_handler = MessageHandler(Filters.command, unknown)
 
-    dispatcher = updater.dispatcher
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(message_handler)
     dispatcher.add_handler(unknown_handler)
 
-    return updater
-
-
-if __name__ == "__main__":
-    c = client(BOT_TOKEN)
-    c.start_polling()
+    updater.start_polling()

@@ -1,19 +1,15 @@
-import os
 import json
+import os
 import queue
 import threading
 import time
-import uuid
 
 import websocket
 
-WS_PORT = os.environ.get("WS_PORT", "34596")
+WS_PORT = os.environ.get("WS_PORT", "35496")
 
 chats = {}
 contexts = {}
-
-def _get_rand_id():
-    return str(uuid.uuid4())
 
 
 def on_message(ws, message):
@@ -29,14 +25,12 @@ def on_close(ws):
     print("Connection closed")
 
 
-def _run(ws, id):
-    ws.send(f'{{"id": "{id}", "text": "ping"}}')
-    chats[ws.chat_id] = queue.Queue()
+def _run(ws, username):
     while True:
         x = chats[ws.chat_id].get()
         if "bye" in x.lower():
             break
-        data = {"id": id, "text": x}
+        data = {"id": username, "text": x}
         json_data = json.dumps(data)
         ws.send(json_data)
 
@@ -45,17 +39,19 @@ def _run(ws, id):
 
 
 def on_open(ws):
-    id = _get_rand_id()
-    threading.Thread(target=_run, args=(ws, id)).start()
+    threading.Thread(target=_run, args=(ws, ws.username)).start()
 
 
-def connect_ws(chat_id):
+def connect_ws(chat_id, username):
     ws = websocket.WebSocketApp(
         f"ws://localhost:{WS_PORT}/websocket",
         on_message=on_message,
         on_error=on_error,
         on_close=on_close,
     )
+    ws.send(f'{{"id": "{username}", "text": "ping"}}')
+    time.sleep(1.5)
     ws.chat_id = chat_id
+    ws.username = username
     ws.on_open = on_open
     ws.run_forever()
