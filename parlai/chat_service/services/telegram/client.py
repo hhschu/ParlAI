@@ -26,6 +26,8 @@ def on_close(ws):
 
 
 def _run(ws, username):
+    ws.send(f'{{"id": "{username}", "text": "ping"}}')
+    time.sleep(1)  # wait for the task to start.
     while True:
         x = chats[ws.chat_id].get()
         if "bye" in x.lower():
@@ -49,8 +51,6 @@ def connect_ws(chat_id, username):
         on_error=on_error,
         on_close=on_close,
     )
-    ws.send(f'{{"id": "{username}", "text": "ping"}}')
-    time.sleep(1.5)
     ws.chat_id = chat_id
     ws.username = username
     ws.on_open = on_open

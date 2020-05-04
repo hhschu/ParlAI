@@ -5,7 +5,7 @@ import threading
 
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
 
-from .client import chats, connect_ws, contexts
+from client import chats, connect_ws, contexts
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG
@@ -28,7 +28,7 @@ def talk(update, context):
         chats[chat_id] = queue.Queue()
         user = update.effective_user
         username = f"{user.first_name} {user.last_name}"
-        threading.Thread(connect_ws, args=(chat_id, username)).start()
+        threading.Thread(target=connect_ws, args=(chat_id, username)).start()
     chats[chat_id].put(incoming_message)
     contexts[chat_id] = context
 
